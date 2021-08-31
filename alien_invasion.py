@@ -2,6 +2,7 @@ import sys
 from time import sleep
 
 import pygame
+from pygame import mixer
 
 from settings import Settings
 from game_stats import GameStats
@@ -83,6 +84,9 @@ class AlienInvasion:
 		# Hide the mouse cursor.
 		pygame.mouse.set_visible(False)
 
+		# Play background music.
+		self._play_background_music()
+
 	def _check_play_button(self, mouse_pos):
 		"""Start a new game when the player clicks Play."""
 		button_clicked = self.play_button.rect.collidepoint(mouse_pos)
@@ -130,6 +134,10 @@ class AlienInvasion:
 		if len(self.bullets) < self.settings.bullets_allowed:
 			new_bullet = Bullet(self)
 			self.bullets.add(new_bullet)
+
+			# Play a sound when bullet is fired.
+			bullet_sound = mixer.Sound('laser.wav')
+			bullet_sound.play()
 
 	def _update_bullets(self):
 		"""Updates position of bullets and gets rid of old bullets."""
@@ -239,11 +247,19 @@ class AlienInvasion:
 			self._create_fleet()
 			self.ship.center_ship()
 
+			# Play explosion sound when collision occurs.
+			explosion_sound = mixer.Sound('explosion.wav')
+			explosion_sound.play()
+
 			# Pause.
 			sleep(0.5)
 		else:
 			self.stats.game_active = False
 			pygame.mouse.set_visible(True)
+
+			# Placeholder for game over sound.
+			explosion_sound = mixer.Sound('explosion.wav')
+			explosion_sound.play()
 
 	def _check_aliens_bottom(self):
 		"""Check if any aliens have reached the bottom of the screen."""
@@ -262,6 +278,12 @@ class AlienInvasion:
 
 		with open(filename, 'w') as file_object:
 			file_object.write(high_score_str)
+
+	def _play_background_music(self):
+		"""Play backround music on a loop."""
+		if self.stats.game_active:
+			mixer.music.load('starwars.wav')
+			mixer.music.play(-1)
 
 	def _update_screen(self):
 		"""Update images on the screen, and flip to the new screen."""
